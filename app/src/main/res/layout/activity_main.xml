@@ -26,7 +26,7 @@
                 android:textColor="#000"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="笨笨的抖音视频无水印下载"/>
+                android:text="短视频无水印下载"/>
         </LinearLayout>
 
         <LinearLayout
@@ -39,7 +39,7 @@
                 android:textColor="#000"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="抖音视频下载"/>
+                android:text="短视频下载"/>
             <LinearLayout
                 android:layout_margin="5dp"
                 android:layout_width="match_parent"
@@ -87,17 +87,17 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="✬解析的视频均为无水印"
+                    android:text="✬抖音、微视、最右无水印下载APP"
                     android:textColor="#000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="✬在上方粘贴抖音分享链接点击开始获取即可解析"
+                    android:text="✬在上方粘贴短视频分享链接点击开始获取即可解析"
                     android:textColor="#000" />
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="✬打开悬浮窗功能即可体验抖音分享链接点击即刻下载"
+                    android:text="✬打开悬浮窗功能即可体验短视频分享链接点击即刻下载"
                     android:textColor="#000" />
                 <TextView
                     android:layout_width="wrap_content"
@@ -113,7 +113,7 @@
                     android:id="@+id/tvPath"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="✬抖音视频无水印存储目录:"
+                    android:text="✬短视频无水印存储目录:"
                     android:textColor="#000" />
             </LinearLayout>
         </LinearLayout>
