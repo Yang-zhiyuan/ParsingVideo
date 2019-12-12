@@ -2,11 +2,9 @@ package com.example.util;
 
 import android.Manifest;
 import android.app.AppOpsManager;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
