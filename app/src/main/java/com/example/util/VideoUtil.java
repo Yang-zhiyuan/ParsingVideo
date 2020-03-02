@@ -3,8 +3,11 @@ package com.example.util;
 import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
@@ -20,12 +23,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -85,10 +90,34 @@ public class VideoUtil implements DownLoadListener {
             @Override
             public void run() {
                 Toast.makeText(context, "下载成功!文件保存目录:" + path, Toast.LENGTH_LONG).show();
+                // 通知图库更新
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    MediaScannerConnection.scanFile(context, new String[]{path}, null,
+                            new MediaScannerConnection.OnScanCompletedListener() {
+                                public void onScanCompleted(String path, Uri uri) {
+                                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                                    mediaScanIntent.setData(uri);
+                                    context.sendBroadcast(mediaScanIntent);
+                                }
+                            });
+                } else {
+                    String relationDir = new File(path).getParent();
+                    File file1 = new File(relationDir);
+                    context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(file1.getAbsoluteFile())));
+                }
             }
         });
     }
 
+//    private boolean deleteSingleFile(String filePath$Name) {
+//        File file = new File(filePath$Name);
+//        // 如果文件路径所对应的文件存在，并且是一个文件，则直接删除
+//        if (file.exists() && file.isFile()) {
+//            return file.delete();
+//        } else {
+//            return false;
+//        }
+//    }
 
     public static final String FILE_PATH = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath();
 
@@ -165,6 +194,7 @@ public class VideoUtil implements DownLoadListener {
                         public void onFailure(Call call, IOException e) {
                             onErrorDownload(context);
                         }
+
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
 
@@ -189,7 +219,7 @@ public class VideoUtil implements DownLoadListener {
                                         int len = 0;
                                         FileOutputStream fos = null;
                                         String FILE_NAME = UUID.randomUUID().toString().replaceAll("-", "");
-                                        File file = new File(FILE_PATH + "/抖音无水印/" + FILE_NAME + ".mp4");
+                                        File file = new File(FILE_PATH + "/DouYinDL/" + FILE_NAME + ".mp4");
                                         if (!file.getParentFile().exists()) {
                                             file.getParentFile().mkdirs();
                                         }
@@ -261,7 +291,7 @@ public class VideoUtil implements DownLoadListener {
                                         int len = 0;
                                         FileOutputStream fos = null;
                                         String FILE_NAME = UUID.randomUUID().toString().replaceAll("-", "");
-                                        File file = new File(FILE_PATH + "/微视无水印/" + FILE_NAME + ".mp4");
+                                        File file = new File(FILE_PATH + "/WeiShiDL/" + FILE_NAME + ".mp4");
                                         if (!file.getParentFile().exists()) {
                                             file.getParentFile().mkdirs();
                                         }
@@ -335,7 +365,7 @@ public class VideoUtil implements DownLoadListener {
                                         int len = 0;
                                         FileOutputStream fos = null;
                                         String FILE_NAME = UUID.randomUUID().toString().replaceAll("-", "");
-                                        File file = new File(FILE_PATH + "/最右无水印/" + FILE_NAME + ".mp4");
+                                        File file = new File(FILE_PATH + "/ZuiYouDL/" + FILE_NAME + ".mp4");
                                         if (!file.getParentFile().exists()) {
                                             file.getParentFile().mkdirs();
                                         }
@@ -375,6 +405,176 @@ public class VideoUtil implements DownLoadListener {
                 } catch (Exception e) {
                     e.printStackTrace();
                     onErrorDownload(context);
+                }
+            } else if (url.contains("pipix")) {
+                try {
+                    onStartDownload(context);
+                    Request request = new Request.Builder().url(url).build();
+                    okHttpClient.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            onErrorDownload(context);
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            String url = response.request().url().toString();
+                            Matcher matcher = Pattern.compile("\\d{19}").matcher(url);
+                            if (matcher.find()) {
+                                String itemId = matcher.group(0);
+                                url = "https://is.snssdk.com/bds/item/detail/?app_name=super&aid=1319&item_id="
+                                        + itemId;
+                                Request request = new Request.Builder().url(url).build();
+                                okHttpClient.newCall(request).enqueue(new Callback() {
+                                    @Override
+                                    public void onFailure(Call call, IOException e) {
+                                        onErrorDownload(context);
+                                    }
+
+                                    @Override
+                                    public void onResponse(Call call, Response response) throws IOException {
+                                        String result = response.body().string();
+                                        String url = JsonUtil.getJsonValue(result,
+                                                "data.data.video.video_fallback.url_list[0].url");
+                                        Request request = new Request.Builder().url(url).build();
+                                        okHttpClient.newCall(request).enqueue(new Callback() {
+                                            @Override
+                                            public void onFailure(Call call, IOException e) {
+                                                onErrorDownload(context);
+                                            }
+
+                                            @Override
+                                            public void onResponse(Call call, Response response) throws IOException {
+                                                InputStream is = null;
+                                                byte[] buf = new byte[2048];
+                                                int len = 0;
+                                                FileOutputStream fos = null;
+                                                String FILE_NAME = UUID.randomUUID().toString().replaceAll("-", "");
+                                                File file = new File(FILE_PATH + "/PiPiXiaDL/" + FILE_NAME + ".mp4");
+                                                if (!file.getParentFile().exists()) {
+                                                    file.getParentFile().mkdirs();
+                                                }
+                                                try {
+                                                    is = response.body().byteStream();
+                                                    long total = response.body().contentLength();
+                                                    fos = new FileOutputStream(file);
+                                                    long sum = 0;
+                                                    while ((len = is.read(buf)) != -1) {
+                                                        fos.write(buf, 0, len);
+                                                        sum += len;
+                                                        int progress = (int) (sum * 1.0f / total * 100);
+                                                        onDownloading(context, progress);
+                                                    }
+                                                    fos.flush();
+                                                    onFinishDownload(context, file.getAbsolutePath());
+                                                } catch (Exception e) {
+                                                    onErrorDownload(context);
+                                                    e.printStackTrace();
+                                                } finally {
+                                                    try {
+                                                        if (is != null) {
+                                                            is.close();
+                                                        }
+                                                        if (fos != null) {
+                                                            fos.close();
+                                                        }
+                                                    } catch (IOException e) {
+                                                        e.printStackTrace();
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    onErrorDownload(context);
+                }
+            } else if (url.contains("chenzhongtech") || url.contains("gifshow")) {
+                try {
+                    String srcStr = "client_key=3c2cd3f3&shareText=" + url;
+                    Map<String, String> map = SingatureUtil.getMapFromStr(srcStr);
+                    map.put("sig", SingatureUtil.genSignature(map));
+                    url = "http://api.gifshow.com/rest/n/tokenShare/info/byText";
+                    RequestBody body = new FormBody.Builder()
+                            .add("client_key", map.get("client_key"))
+                            .add("shareText", map.get("shareText"))
+                            .add("sig", map.get("sig")).build();
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .addHeader(
+                                    "User-Agent",
+                                    "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/16D57 Version/12.0 Safari/604.1")
+                            .post(body).build();
+                    onStartDownload(context);
+                    okHttpClient.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            onErrorDownload(context);
+                            Log.e("error",e.getMessage());
+                        }
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            String result = response.body().string();
+                            Request request = new Request.Builder().url(JsonUtil.getJsonValue(result,
+                                    "shareTokenDialog.feed.main_mv_url")).build();
+                            okHttpClient.newCall(request).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(Call call, IOException e) {
+                                    onErrorDownload(context);
+                                    Log.e("error",e.getMessage());
+                                }
+
+                                @Override
+                                public void onResponse(Call call, Response response) {
+                                    InputStream is = null;
+                                    byte[] buf = new byte[2048];
+                                    int len = 0;
+                                    FileOutputStream fos = null;
+                                    String FILE_NAME = UUID.randomUUID().toString().replaceAll("-", "");
+                                    File file = new File(FILE_PATH + "/KuaiShouDL/" + FILE_NAME + ".mp4");
+                                    if (!file.getParentFile().exists()) {
+                                        file.getParentFile().mkdirs();
+                                    }
+                                    try {
+                                        is = response.body().byteStream();
+                                        long total = response.body().contentLength();
+                                        fos = new FileOutputStream(file);
+                                        long sum = 0;
+                                        while ((len = is.read(buf)) != -1) {
+                                            fos.write(buf, 0, len);
+                                            sum += len;
+                                            int progress = (int) (sum * 1.0f / total * 100);
+                                            onDownloading(context, progress);
+                                        }
+                                        fos.flush();
+                                        onFinishDownload(context, file.getAbsolutePath());
+                                    } catch (Exception e) {
+                                        onErrorDownload(context);
+                                        e.printStackTrace();
+                                    } finally {
+                                        try {
+                                            if (is != null) {
+                                                is.close();
+                                            }
+                                            if (fos != null) {
+                                                fos.close();
+                                            }
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    onErrorDownload(context);
+                    Log.e("error",e.getMessage());
                 }
             }
         } else {

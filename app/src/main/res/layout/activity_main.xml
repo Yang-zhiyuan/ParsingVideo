@@ -87,7 +87,12 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="✬抖音、微视、最右无水印下载APP"
+                    android:text="✬支持抖音、快手、微视、最右、皮皮虾无水印下载"
+                    android:textColor="#000" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="✬修复下载后文件相册不显示问题"
                     android:textColor="#000" />
                 <TextView
                     android:layout_width="wrap_content"
@@ -117,6 +122,29 @@
                     android:textColor="#000" />
             </LinearLayout>
         </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="15dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:padding="8dp">
+        <Button
+            android:id="@+id/btnClean"
+            android:background="@drawable/black_shape_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="清空链接"
+            android:textColor="#000" />
+        <Button
+            android:id="@+id/btnGood"
+            android:layout_marginLeft="-1dp"
+            android:background="@drawable/black_shape_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="支持作者"
+            android:textColor="#000" />
+    </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

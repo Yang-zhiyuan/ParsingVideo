@@ -21,8 +21,10 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.util.VideoUtil;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,6 +33,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText etUrl;
     private Button btnParse;
     private TextView tvPath;
+    private Button btnClean;
+    private Button btnGood;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
         etUrl = (EditText) findViewById(R.id.etUrl);
         btnParse = (Button) findViewById(R.id.btnParse);
         tvPath = (TextView) findViewById(R.id.tvPath);
+        btnClean = (Button) findViewById(R.id.btnClean);
+        btnGood = (Button) findViewById(R.id.btnGood);
         tvPath.setText(tvPath.getText() + VideoUtil.FILE_PATH);
         btnParse.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,6 +63,18 @@ public class MainActivity extends AppCompatActivity {
                 if (!url.isEmpty()) {
                     VideoUtil.getInstance().parse(MainActivity.this, url);
                 }
+            }
+        });
+        btnClean.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                etUrl.setText("");
+            }
+        });
+        btnGood.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                donate();
             }
         });
     }
@@ -149,18 +167,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-        menu.add(Menu.NONE, 1, 0, "捐赠作者");
+        menu.add(Menu.NONE, 1, 0, "捐赠作者").setIcon(R.mipmap.ic_launcher);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         super.onOptionsItemSelected(item);
+        donate();
+        return true;
+    }
+
+    private void donate() {
         boolean hasInstalledAlipayClient = AlipayDonate.hasInstalledAlipayClient(this);
         if (hasInstalledAlipayClient) {
             AlipayDonate.startAlipayClient(this, payCode);
+        } else {
+            Toast.makeText(this, "手机未安装支付宝程序", Toast.LENGTH_SHORT).show();
         }
-        return true;
     }
 
     @Override
