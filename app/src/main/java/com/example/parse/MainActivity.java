@@ -4,8 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
-import android.content.ClipData;
-import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.didikee.donate.AlipayDonate;
 import android.graphics.PixelFormat;
@@ -18,13 +17,14 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.util.ClipBoardUtil;
 import com.example.util.VideoUtil;
 
 public class MainActivity extends AppCompatActivity {
@@ -115,19 +115,21 @@ public class MainActivity extends AppCompatActivity {
                     ((ImageView) view).setImageAlpha(255);
                     VideoUtil.getInstance().writeXY(MainActivity.this, layoutParams.x, layoutParams.y);
                     if (Math.abs(event.getRawX() - lastX) < 5 && Math.abs(event.getRawY() - lastY) < 5) {
-                        try {
-                            ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                            ClipData data = cm.getPrimaryClip();
-                            ClipData.Item item = data.getItemAt(0);
-                            String url = item.getText().toString();
+//                            ClipboardManager cm = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+//                            ClipData data = cm.getPrimaryClip();
+//                            ClipData.Item item = data.getItemAt(0);
+//                            String url = item.getText().toString();
+//                            VideoUtil.getInstance().parse(MainActivity.this, url);
+//                            if (cm != null) {
+//                                cm.setPrimaryClip(cm.getPrimaryClip());
+//                                cm.setText(null);
+//                            }
+                        if (Build.VERSION.SDK_INT >= 29) {
+                            startActivity(new Intent(MainActivity.this, EmptyActivity.class));
+                        } else {
+                            String url = ClipBoardUtil.paste(MainActivity.this);
                             VideoUtil.getInstance().parse(MainActivity.this, url);
-                            if (cm != null) {
-                                cm.setPrimaryClip(cm.getPrimaryClip());
-                                cm.setText(null);
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Toast.makeText(MainActivity.this, "请先复制短视频分享链接", Toast.LENGTH_SHORT).show();
+                            ClipBoardUtil.clear(MainActivity.this);
                         }
                     }
                 default:
@@ -160,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
             // 将悬浮窗控件添加到WindowManager
             windowManager.addView(img, layoutParams);
             img.setOnTouchListener(new FloatingOnTouchListener(windowManager, layoutParams));
-
         }
     }
 
@@ -199,5 +200,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
 }

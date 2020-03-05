@@ -90,21 +90,25 @@ public class VideoUtil implements DownLoadListener {
             @Override
             public void run() {
                 Toast.makeText(context, "下载成功!文件保存目录:" + path, Toast.LENGTH_LONG).show();
-                // 通知图库更新
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    MediaScannerConnection.scanFile(context, new String[]{path}, null,
-                            new MediaScannerConnection.OnScanCompletedListener() {
-                                public void onScanCompleted(String path, Uri uri) {
-                                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-                                    mediaScanIntent.setData(uri);
-                                    context.sendBroadcast(mediaScanIntent);
-                                }
-                            });
-                } else {
-                    String relationDir = new File(path).getParent();
-                    File file1 = new File(relationDir);
-                    context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(file1.getAbsoluteFile())));
-                }
+                File file = new File(path);
+                context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, Uri.parse("file://" + file)));
+                // 扫描单个媒体文件，注意是文件，不是文件夹
+                // new SingleMediaScanner(context, file);
+//                // 通知图库更新
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+//                    MediaScannerConnection.scanFile(context, new String[]{path}, null,
+//                            new MediaScannerConnection.OnScanCompletedListener() {
+//                                public void onScanCompleted(String path, Uri uri) {
+//                                    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+//                                    mediaScanIntent.setData(uri);
+//                                    context.sendBroadcast(mediaScanIntent);
+//                                }
+//                            });
+//                } else {
+//                    String relationDir = new File(path).getParent();
+//                    File file1 = new File(relationDir);
+//                    context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.fromFile(file1.getAbsoluteFile())));
+//                }
             }
         });
     }
@@ -493,7 +497,7 @@ public class VideoUtil implements DownLoadListener {
                     e.printStackTrace();
                     onErrorDownload(context);
                 }
-            } else if (url.contains("chenzhongtech") || url.contains("gifshow")) {
+            } else if (url.contains("chenzhongtech") || url.contains("gifshow") || url.contains("kuaishou")) {
                 try {
                     String srcStr = "client_key=3c2cd3f3&shareText=" + url;
                     Map<String, String> map = SingatureUtil.getMapFromStr(srcStr);
@@ -514,8 +518,9 @@ public class VideoUtil implements DownLoadListener {
                         @Override
                         public void onFailure(Call call, IOException e) {
                             onErrorDownload(context);
-                            Log.e("error",e.getMessage());
+                            Log.e("error", e.getMessage());
                         }
+
                         @Override
                         public void onResponse(Call call, Response response) throws IOException {
                             String result = response.body().string();
@@ -525,7 +530,7 @@ public class VideoUtil implements DownLoadListener {
                                 @Override
                                 public void onFailure(Call call, IOException e) {
                                     onErrorDownload(context);
-                                    Log.e("error",e.getMessage());
+                                    Log.e("error", e.getMessage());
                                 }
 
                                 @Override
@@ -574,7 +579,7 @@ public class VideoUtil implements DownLoadListener {
                 } catch (Exception e) {
                     e.printStackTrace();
                     onErrorDownload(context);
-                    Log.e("error",e.getMessage());
+                    Log.e("error", e.getMessage());
                 }
             }
         } else {
