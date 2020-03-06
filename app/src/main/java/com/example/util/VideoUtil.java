@@ -207,8 +207,9 @@ public class VideoUtil implements DownLoadListener {
                                     .compile("(?<=playAddr: \")https?://.+(?=\",)");
                             Matcher matcher = patternCompile.matcher(html);
                             while (matcher.find()) {
-                                Request request = new Request.Builder().url(matcher.group(0).replaceAll("playwm", "play")).addHeader("User-Agent",
+                                Request request = new Request.Builder().url(matcher.group(0).replaceAll("playwm", "play")).addHeader("Connection","keep-alive").addHeader("User-Agent",
                                         "Mozilla/5.0 (iPhone; CPU iPhone OS 12_1_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/16D57 Version/12.0 Safari/604.1").build();
+                                //     Request request = new Request.Builder().url(matcher.group(0).replaceAll("playwm", "play")).build();
                                 Log.e("TAG", matcher.group(0).replaceAll("playwm", "play"));
                                 okHttpClient.newCall(request).enqueue(new Callback() {
                                     @Override
